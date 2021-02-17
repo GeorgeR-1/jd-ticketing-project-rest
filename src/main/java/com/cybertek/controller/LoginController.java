@@ -16,6 +16,7 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.stereotype.Controller;
@@ -80,8 +81,9 @@ public class LoginController {
 
 		UserDTO createdUser = userService.save(userDTO);
 
+		sendEmail(createEmail(createdUser));
 
-
+		return ResponseEntity.ok(new ResponseWrapper("User has been created!", createdUser));
 	}
 
 	private MailDTO createEmail(UserDTO userDTO){
@@ -102,5 +104,19 @@ public class LoginController {
 				.url(BASE_URL + "/confirmation?token=")
 				.build();
 	}
+
+	private void sendEmail(MailDTO mailDTO){
+
+		SimpleMailMessage  mailMessage = new SimpleMailMessage();
+
+		mailMessage.setTo(mailDTO.getEmailTo());
+		mailMessage.setSubject(mailDTO.getSubject());
+		mailMessage.setText(mailDTO.getMessage() + mailDTO.getUrl() + mailDTO.getToken());
+
+		confirmationTokenService.sendEmail(mailMessage);
+
+
+	}
+
 
 }
