@@ -23,18 +23,19 @@ spring:
     host: smtp.gmail.com
     port: 587
     properties:
-      transport:
-        protocol: smtp
-      smtp:
-        starttls:
-          enabled: true
-          required: true
-        auth: true
-        connectiontimeout: 5000
-        timeout: 5000
-        writetimeout: 5000
-      username: cybertekschool.email@gamil.com
-      password: Cybertekschool@2020
+      mail:
+        transport:
+          protocol: smtp
+        smtp:
+          starttls:
+            enabled: true
+            required: true
+          auth: true
+          connectiontimeout: 5000
+          timeout: 5000
+          writetimeout: 5000
+    username: cybertekschool.email@gmail.com
+    password: Cybertekschool@2020
 security:
   jwt:
     secret-key: cybertek
