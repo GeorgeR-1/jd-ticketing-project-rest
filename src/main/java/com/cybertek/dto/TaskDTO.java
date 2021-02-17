@@ -2,6 +2,7 @@ package com.cybertek.dto;
 
 
 import com.cybertek.enums.Status;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 @Setter
+@JsonIgnoreProperties(value = {"hibernateLazyInitializer"},ignoreUnknown = true)
 public class TaskDTO {
 
     private Long id;
