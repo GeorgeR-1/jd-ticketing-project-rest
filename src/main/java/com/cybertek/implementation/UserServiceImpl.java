@@ -59,15 +59,21 @@ public class UserServiceImpl implements UserService {
     }
 
     @Override
-    public void save(UserDTO dto) {
+    public UserDTO save(UserDTO dto) throws TicketingProjectException {
 
         User foundUser = userRepository.findByUserName(dto.getUserName());
-        dto.setEnabled(true);
 
-        User obj = userMapper.convertToEntity(dto);
-        obj.setPassWord(passwordEncoder.encode(obj.getPassWord()));
+        if (foundUser != null){
+            throw new TicketingProjectException("User already exists");
+        }
 
-        userRepository.save(obj);
+
+        User user = userMapper.convertToEntity(dto);
+        user.setPassWord(passwordEncoder.encode(user.getPassWord()));
+
+        User entity = userRepository.save(user);
+
+        return userMapper.convertToDto(entity);
     }
 
     @Override

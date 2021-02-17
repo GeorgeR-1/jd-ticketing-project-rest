@@ -67,7 +67,7 @@ public class LoginController {
 	@DefaultExceptionMessage(defaultMassage = "Something went wrong, try again!")
 	@PostMapping("/create-user")
 	@Operation(summary = "Create new account")
-	private ResponseEntity<ResponseWrapper> doRegister(@RequestBody UserDTO userDTO){
+	private ResponseEntity<ResponseWrapper> doRegister(@RequestBody UserDTO userDTO) throws TicketingProjectException {
 
 		UserDTO createdUser = userService.save(userDTO);
 
