@@ -55,7 +55,15 @@ public class ProjectController {
         return ResponseEntity.ok(new ResponseWrapper("Project is retrieved",projectDTO));
     }
 
+    @PostMapping
+    @Operation(summary = "Create project")
+    @DefaultExceptionMessage(defaultMassage = "Something went wrong. try again!")
+    @PreAuthorize("hasAnyAuthority('Admin','Manager')")
+    public ResponseEntity<ResponseWrapper> createProject(@RequestBody ProjectDTO projectDTO){
 
+        ProjectDTO createdProject = projectService.save(projectDTO);
+        return ResponseEntity.ok(new ResponseWrapper("Project is retrieved",createdProject));
+    }
 
 
 

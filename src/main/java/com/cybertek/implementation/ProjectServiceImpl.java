@@ -5,6 +5,7 @@ import com.cybertek.dto.UserDTO;
 import com.cybertek.entity.Project;
 import com.cybertek.entity.User;
 import com.cybertek.enums.Status;
+import com.cybertek.exception.TicketingProjectException;
 import com.cybertek.mapper.ProjectMapper;
 import com.cybertek.mapper.UserMapper;
 import com.cybertek.repository.ProjectRepository;
@@ -55,12 +56,18 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public Project save(ProjectDTO dto) {
-        dto.setProjectStatus(Status.OPEN);
+    public ProjectDTO save(ProjectDTO dto) throws TicketingProjectException {
+        Project foundProject = projectRepository.findByProjectCode(dto.getProjectCode());
+
+        if (foundProject != null){
+            throw new TicketingProjectException("Project with this code already exists");
+        }
+
         Project obj = projectMapper.convertToEntity(dto);
-        //obj.setAssignedManager(userMapper.convertToEntity(dto.getAssignedManager()));
-        Project project = projectRepository.save(obj);
-        return project;
+
+        Project createdProject = projectRepository.save(obj);
+
+        return projectMapper.convertToDto(createdProject);
     }
 
     @Override
