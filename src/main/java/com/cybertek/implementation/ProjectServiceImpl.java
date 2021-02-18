@@ -9,6 +9,7 @@ import com.cybertek.exception.TicketingProjectException;
 import com.cybertek.mapper.ProjectMapper;
 import com.cybertek.mapper.UserMapper;
 import com.cybertek.repository.ProjectRepository;
+import com.cybertek.repository.UserRepository;
 import com.cybertek.service.ProjectService;
 import com.cybertek.service.TaskService;
 import com.cybertek.service.UserService;
@@ -27,8 +28,9 @@ public class ProjectServiceImpl implements ProjectService {
     private UserService userService;
     private UserMapper userMapper;
     private TaskService taskService;
+    private UserRepository userRepository;
 
-    public ProjectServiceImpl(ProjectMapper projectMapper,
+    public ProjectServiceImpl(ProjectMapper projectMapper, UserRepository userRepository,
                               ProjectRepository projectRepository, UserService userService,
                               UserMapper userMapper, TaskService taskService) {
 
@@ -37,6 +39,7 @@ public class ProjectServiceImpl implements ProjectService {
         this.userService = userService;
         this.userMapper = userMapper;
         this.taskService = taskService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -71,17 +74,26 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void update(ProjectDTO dto) {
+    public ProjectDTO update(ProjectDTO dto) throws TicketingProjectException {
         Project project = projectRepository.findByProjectCode(dto.getProjectCode());
+        if (project == null){
+            throw new TicketingProjectException("Project does not exist");
+        }
         Project convertedProject = projectMapper.convertToEntity(dto);
-        convertedProject.setId(project.getId());
-        convertedProject.setProjectStatus(project.getProjectStatus());
-        projectRepository.save(convertedProject);
+
+        Project updatedProject = projectRepository.save(convertedProject);
+
+        return projectMapper.convertToDto(updatedProject);
     }
 
     @Override
-    public void delete(String code) {
+    public void delete(String code) throws TicketingProjectException {
         Project project = projectRepository.findByProjectCode(code);
+
+        if (project == null){
+            throw new TicketingProjectException("Project does not exist");
+        }
+
         project.setIsDeleted(true);
 
         project.setProjectCode(project.getProjectCode() + "-" + project.getId());
@@ -92,21 +104,33 @@ public class ProjectServiceImpl implements ProjectService {
     }
 
     @Override
-    public void complete(String projectCode) {
+    public ProjectDTO complete(String projectCode) throws TicketingProjectException {
 
         Project project = projectRepository.findByProjectCode(projectCode);
+
+        if (project == null){
+            throw new TicketingProjectException("Project does not exist");
+        }
+
         project.setProjectStatus(Status.COMPLETE);
-        projectRepository.save(project);
+        Project savedProject = projectRepository.save(project);
+        return projectMapper.convertToDto(savedProject);
     }
 
     @Override
-    public List<ProjectDTO> listAllProjectDetails() {
+    public List<ProjectDTO> listAllProjectDetails() throws TicketingProjectException {
 
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+        String id = SecurityContextHolder.getContext().getAuthentication().getName();
+        Long currentId = Long.parseLong(id);
 
-        UserDTO currentUserDTO = userService.findByUserName(username);
-        User user = userMapper.convertToEntity(currentUserDTO);
+        User user = userRepository.findById(currentId)
+                .orElseThrow(() -> new TicketingProjectException("This manager does not exist"));
+
         List<Project> list = projectRepository.findAllByAssignedManager(user);
+
+        if (list.size() == 0){
+            throw new TicketingProjectException("This manager does not have any project assigned");
+        }
 
         return list.stream().map(project -> {
             ProjectDTO obj = projectMapper.convertToDto(project);

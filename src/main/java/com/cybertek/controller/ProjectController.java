@@ -7,6 +7,7 @@ import com.cybertek.dto.UserDTO;
 import com.cybertek.entity.Project;
 import com.cybertek.entity.ResponseWrapper;
 import com.cybertek.enums.Status;
+import com.cybertek.exception.TicketingProjectException;
 import com.cybertek.service.ProjectService;
 import com.cybertek.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -59,12 +60,51 @@ public class ProjectController {
     @Operation(summary = "Create project")
     @DefaultExceptionMessage(defaultMassage = "Something went wrong. try again!")
     @PreAuthorize("hasAnyAuthority('Admin','Manager')")
-    public ResponseEntity<ResponseWrapper> createProject(@RequestBody ProjectDTO projectDTO){
+    public ResponseEntity<ResponseWrapper> createProject(@RequestBody ProjectDTO projectDTO) throws TicketingProjectException {
 
         ProjectDTO createdProject = projectService.save(projectDTO);
         return ResponseEntity.ok(new ResponseWrapper("Project is retrieved",createdProject));
     }
 
+    @PutMapping
+    @Operation(summary = "Update project")
+    @DefaultExceptionMessage(defaultMassage = "Something went wrong. try again!")
+    @PreAuthorize("hasAnyAuthority('Admin','Manager')")
+    public ResponseEntity<ResponseWrapper> updateProject(@RequestBody ProjectDTO projectDTO) throws TicketingProjectException {
+
+        ProjectDTO updatedProject = projectService.update(projectDTO);
+        return ResponseEntity.ok(new ResponseWrapper("Project is updated",updatedProject));
+    }
+
+    @DeleteMapping("/{projectcode}")
+    @Operation(summary = "Delete project")
+    @DefaultExceptionMessage(defaultMassage = "Fail to delete project")
+    @PreAuthorize("hasAnyAuthority('Admin','Manager')")
+    public ResponseEntity<ResponseWrapper> deleteProject(@PathVariable("projectcode") String projectcode) throws TicketingProjectException {
+
+        projectService.delete(projectcode);
+        return ResponseEntity.ok(new ResponseWrapper("Project is deleted"));
+    }
+
+    @PutMapping("/complete/{projectcode}")
+    @Operation(summary = "Complete project")
+    @DefaultExceptionMessage(defaultMassage = "Something went wrong. try again!")
+    @PreAuthorize("hasAuthority('Manager')")
+    public ResponseEntity<ResponseWrapper> completeProject(@PathVariable("projectcode") String projectcode) throws TicketingProjectException {
+
+        ProjectDTO compeltedProject = projectService.complete(projectcode);
+        return ResponseEntity.ok(new ResponseWrapper("Project is completed",compeltedProject));
+    }
+
+    @GetMapping("/details")
+    @Operation(summary = "Real all project details")
+    @DefaultExceptionMessage(defaultMassage = "Something went wrong. try again!")
+    @PreAuthorize("hasAuthority('Manager')")
+    public ResponseEntity<ResponseWrapper> readAllProjectDetails() throws TicketingProjectException {
+
+        List<ProjectDTO>projectDTOS = projectService.listAllProjectDetails();
+        return ResponseEntity.ok(new ResponseWrapper("Projects are retrieved",projectDTOS));
+    }
 
 
 
