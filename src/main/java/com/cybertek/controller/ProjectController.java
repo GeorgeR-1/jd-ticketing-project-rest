@@ -1,25 +1,29 @@
 package com.cybertek.controller;
 
+import com.cybertek.annotation.DefaultExceptionMessage;
 import com.cybertek.dto.ProjectDTO;
 import com.cybertek.dto.TaskDTO;
 import com.cybertek.dto.UserDTO;
 import com.cybertek.entity.Project;
+import com.cybertek.entity.ResponseWrapper;
 import com.cybertek.enums.Status;
 import com.cybertek.service.ProjectService;
 import com.cybertek.service.UserService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.stream.Collectors;
 
-@Controller
-@RequestMapping("/project")
+@RestController
+@RequestMapping("api/v1/project")
+@Tag(name = "Project Controller", description = "Project API")
 public class ProjectController {
 
 
@@ -31,75 +35,26 @@ public class ProjectController {
         this.userService = userService;
     }
 
-    //    @Autowired
-//    TaskService taskService;
-//
-    @GetMapping("/create")
-    public String createProject(Model model){
+    @GetMapping
+    @Operation(summary = "Read all project")
+    @DefaultExceptionMessage(defaultMassage = "Something went wrong, try again!")
+    @PreAuthorize("hasAnyAuthority('Admin','Manager')")
+    public ResponseEntity<ResponseWrapper> readAll(){
 
-        model.addAttribute("project",new ProjectDTO());
-        model.addAttribute("projects",projectService.listAllProjects());
-        model.addAttribute("managers",userService.listAllByRole("manager"));
-
-        return "/project/create";
+        List<ProjectDTO> projectDTOS = projectService.listAllProjects();
+        return ResponseEntity.ok(new ResponseWrapper("Projects are retrieved",projectDTOS));
     }
 
-    @PostMapping("/create")
-    public String insertProject(ProjectDTO project){
-        projectService.save(project);
-        project.setProjectStatus(Status.OPEN);
-        return "redirect:/project/create";
+    @GetMapping("/{projectcode}")
+    @Operation(summary = "Read by project code")
+    @DefaultExceptionMessage(defaultMassage = "Something went wrong. try again!")
+    @PreAuthorize("hasAnyAuthority('Admin','Manager')")
+    public ResponseEntity<ResponseWrapper> readByProjectCode(@PathVariable("projectcode") String projectcode){
 
+        ProjectDTO projectDTO = projectService.getByProjectCode(projectcode);
+        return ResponseEntity.ok(new ResponseWrapper("Project is retrieved",projectDTO));
     }
 
-    @GetMapping("/delete/{projectcode}")
-    public String deleteProject(@PathVariable("projectcode") String projectcode){
-        projectService.delete(projectcode);
-        return "redirect:/project/create";
-    }
-
-    @GetMapping("/complete/{projectcode}")
-    public String completeProject(@PathVariable("projectcode") String projectcode){
-        projectService.complete(projectcode);
-        return "redirect:/project/create";
-    }
-
-    @GetMapping("/update/{projectcode}")
-    public String editProject(@PathVariable("projectcode") String projectcode,Model model){
-
-        model.addAttribute("project",projectService.getByProjectCode(projectcode));
-        model.addAttribute("projects",projectService.listAllProjects());
-        model.addAttribute("managers",userService.listAllByRole("manager"));
-
-        return "/project/update";
-    }
-
-    @PostMapping("/update/{projectcode}")
-    public String updateProject(@PathVariable("projectcode") String projectcode,ProjectDTO project,Model model){
-
-        projectService.update(project);
-
-        return "redirect:/project/create";
-    }
-
-    @GetMapping("/manager/complete")
-    public String getProjectsByManager(Model model){
-
-        List<ProjectDTO> projects = projectService.listAllProjectDetails();
-
-        model.addAttribute("projects", projects);
-
-
-        return "/manager/project-status";
-    }
-
-    @GetMapping("/manager/complete/{projectCode}")
-    public String manager_completed(@PathVariable("projectCode") String projectCode, Model model){
-
-        projectService.complete(projectCode);
-
-        return "redirect:/project/manager/complete";
-    }
 
 
 

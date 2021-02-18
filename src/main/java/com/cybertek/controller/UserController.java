@@ -101,7 +101,7 @@ public class UserController {
 
     @GetMapping("/{username}")
     @DefaultExceptionMessage(defaultMassage = "Something went wrong, try again!")
-    @Operation(summary = "Read all users")
+    @Operation(summary = "Read user by username")
     //TODO only admin should see other profiles or current user can see his/her profile
     public ResponseEntity<ResponseWrapper> readByUsername(@PathVariable("username") String username){
 
