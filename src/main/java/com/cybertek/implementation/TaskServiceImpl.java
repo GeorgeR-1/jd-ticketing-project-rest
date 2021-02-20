@@ -51,11 +51,12 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public Task save(TaskDTO dto) {
+    public TaskDTO save(TaskDTO dto) {
         dto.setTaskStatus(Status.OPEN);
         dto.setAssignedDate(LocalDate.now());
         Task task = taskMapper.convertToEntity(dto);
-        return taskRepository.save(task);
+        Task save =taskRepository.save(task);
+        return taskMapper.convertToDto(save);
     }
 
     @Override
@@ -118,9 +119,12 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<TaskDTO> listAllTaskByProjectManager() {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByUserName(username);
+    public List<TaskDTO> listAllTaskByProjectManager() throws TicketingProjectException {
+        String id = SecurityContextHolder.getContext().getAuthentication().getName();
+
+        User user = userRepository.findById(Long.parseLong(id))
+                .orElseThrow(() -> new TicketingProjectException("This user does not exist"));
+
         List<Task> tasks = taskRepository.findAllByProjectAssignedManager(user);
 
         return tasks.stream().map(taskMapper::convertToDto).collect(Collectors.toList());
