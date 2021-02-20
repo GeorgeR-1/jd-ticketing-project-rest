@@ -2,7 +2,6 @@ package com.cybertek.service;
 
 import com.cybertek.dto.ProjectDTO;
 import com.cybertek.dto.TaskDTO;
-import com.cybertek.entity.Task;
 import com.cybertek.entity.User;
 import com.cybertek.enums.Status;
 import com.cybertek.exception.TicketingProjectException;
@@ -14,8 +13,8 @@ public interface TaskService {
     TaskDTO findById(Long id) throws TicketingProjectException;
     List<TaskDTO> listAllTasks();
     TaskDTO save(TaskDTO dto);
-    void delete(Long id);
-    void update(TaskDTO dto);
+    void delete(Long id) throws TicketingProjectException;
+    TaskDTO update(TaskDTO dto) throws TicketingProjectException;
 
     int totalNonCompletedTasks(String projectCode);
 

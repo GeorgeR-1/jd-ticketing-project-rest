@@ -2,7 +2,6 @@ package com.cybertek.implementation;
 
 import com.cybertek.dto.ProjectDTO;
 import com.cybertek.dto.TaskDTO;
-import com.cybertek.entity.Project;
 import com.cybertek.entity.Task;
 import com.cybertek.entity.User;
 import com.cybertek.enums.Status;
@@ -60,26 +59,22 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public void delete(Long id) {
-        Optional<Task> foundTask = taskRepository.findById(id);
-        if (foundTask.isPresent()) {
-            foundTask.get().setIsDeleted(true);
-            taskRepository.save(foundTask.get());
-        }
-
+    public void delete(Long id) throws TicketingProjectException {
+        Task foundTask = taskRepository.findById(id).orElseThrow(() -> new TicketingProjectException("Task does not exist"));
+        foundTask.setIsDeleted(true);
+        taskRepository.save(foundTask);
     }
 
     @Override
-    public void update(TaskDTO dto) {
-        Optional<Task> task = taskRepository.findById(dto.getId());
+    public TaskDTO update(TaskDTO dto) throws TicketingProjectException {
+        Task task = taskRepository.findById(dto.getId())
+                .orElseThrow(() -> new TicketingProjectException("Task does not exist"));
+
         Task convertedTask = taskMapper.convertToEntity(dto);
 
-        if (task.isPresent()) {
-            convertedTask.setId(task.get().getId());
-            convertedTask.setTaskStatus(task.get().getTaskStatus());
-            convertedTask.setAssignedDate(task.get().getAssignedDate());
-            taskRepository.save(convertedTask);
-        }
+        Task save = taskRepository.save(convertedTask);
+
+        return taskMapper.convertToDto(save);
 
     }
 
@@ -98,7 +93,13 @@ public class TaskServiceImpl implements TaskService {
     public void deleteByProject(ProjectDTO project) {
 
         List<TaskDTO> taskList = listAllByProject(project);
-        taskList.forEach(taskDTO -> delete(taskDTO.getId()));
+        taskList.forEach(taskDTO -> {
+            try {
+                delete(taskDTO.getId());
+            } catch (TicketingProjectException e) {
+                e.printStackTrace();
+            }
+        });
 
     }
 

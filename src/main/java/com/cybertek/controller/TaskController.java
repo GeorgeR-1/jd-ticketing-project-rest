@@ -54,14 +54,30 @@ public class TaskController {
     @PostMapping
     @DefaultExceptionMessage(defaultMassage = "Something went wrong, please try again!")
     @Operation(summary = "Create a new task")
-    @PreAuthorize("hasAnyAuthority('Manager','Employee')")
+    @PreAuthorize("hasAnyAuthority('Manager')")
     public ResponseEntity<ResponseWrapper> create(@RequestBody TaskDTO task){
 
         TaskDTO createdTask = taskService.save(task);
         return ResponseEntity.ok(new ResponseWrapper("Successfully task created",createdTask));
-
     }
 
+    @DeleteMapping("/{id}")
+    @DefaultExceptionMessage(defaultMassage = "Something went wrong, please try again!")
+    @Operation(summary = "Delete a task")
+    @PreAuthorize("hasAnyAuthority('Manager')")
+    public ResponseEntity<ResponseWrapper> delete(@PathVariable("id") Long id) throws TicketingProjectException {
+        taskService.delete(id);
+        return ResponseEntity.ok(new ResponseWrapper("Successfully deleted"));
+    }
+
+    @PutMapping("/{id}")
+    @DefaultExceptionMessage(defaultMassage = "Something went wrong, please try again!")
+    @Operation(summary = "Update task")
+    @PreAuthorize("hasAnyAuthority('Manager')")
+    public ResponseEntity<ResponseWrapper> updateTask(@RequestBody TaskDTO task) throws TicketingProjectException {
+        TaskDTO updatedTask = taskService.update(task);
+
+    }
 
 
 }
