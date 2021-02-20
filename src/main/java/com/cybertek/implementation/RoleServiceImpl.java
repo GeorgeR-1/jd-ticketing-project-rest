@@ -2,6 +2,7 @@ package com.cybertek.implementation;
 
 import com.cybertek.dto.RoleDTO;
 import com.cybertek.entity.Role;
+import com.cybertek.exception.TicketingProjectException;
 import com.cybertek.mapper.RoleMapper;
 import com.cybertek.repository.RoleRepository;
 import com.cybertek.service.RoleService;
@@ -30,15 +31,14 @@ public class RoleServiceImpl implements RoleService {
 
         List<Role> list = roleRepository.findAll();
 
-        return list.stream().map(obj -> {
-                return roleMapper.convertToDto(obj);
-                }).collect(Collectors.toList());
+        return list.stream().map(obj -> roleMapper.convertToDto(obj)).collect(Collectors.toList());
 
     }
 
     @Override
-    public RoleDTO findById(Long id) {
-        Role role = roleRepository.findById(id).get();
+    public RoleDTO findById(Long id) throws TicketingProjectException {
+        Role role = roleRepository.findById(id)
+                .orElseThrow(() -> new TicketingProjectException("Role does not exist"));
         return roleMapper.convertToDto(role);
     }
 }
