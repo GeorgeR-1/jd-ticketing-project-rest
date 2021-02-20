@@ -2,9 +2,7 @@ package com.cybertek.implementation;
 
 import com.cybertek.dto.UserDTO;
 import com.cybertek.entity.User;
-import com.cybertek.entity.common.UserPrincipal;
 import com.cybertek.mapper.UserMapper;
-import com.cybertek.repository.UserRepository;
 import com.cybertek.service.SecurityService;
 import com.cybertek.service.UserService;
 import org.springframework.security.core.GrantedAuthority;
@@ -16,7 +14,6 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
 public class SecurityServiceImpl implements SecurityService {
