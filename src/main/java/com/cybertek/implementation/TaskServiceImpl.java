@@ -6,6 +6,7 @@ import com.cybertek.entity.Project;
 import com.cybertek.entity.Task;
 import com.cybertek.entity.User;
 import com.cybertek.enums.Status;
+import com.cybertek.exception.TicketingProjectException;
 import com.cybertek.mapper.ProjectMapper;
 import com.cybertek.mapper.TaskMapper;
 import com.cybertek.repository.TaskRepository;
@@ -37,13 +38,9 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public TaskDTO findById(Long id) {
-        Optional<Task> task = taskRepository.findById(id);
-        if (task.isPresent()) {
-            return taskMapper.convertToDto(task.get());
-        }
-
-        return null;
+    public TaskDTO findById(Long id) throws TicketingProjectException {
+        Task task = taskRepository.findById(id).orElseThrow(() -> new TicketingProjectException("Task does not exist"));
+        return taskMapper.convertToDto(task);
     }
 
     @Override
