@@ -2,6 +2,7 @@ package com.cybertek.service;
 
 import com.cybertek.dto.ProjectDTO;
 import com.cybertek.dto.TaskDTO;
+import com.cybertek.entity.Task;
 import com.cybertek.entity.User;
 import com.cybertek.enums.Status;
 import com.cybertek.exception.TicketingProjectException;
@@ -24,13 +25,13 @@ public interface TaskService {
 
     List<TaskDTO> listAllByProject(ProjectDTO project);
 
-    List<TaskDTO> listAllTaskByStatusIsNot(Status status);
+    List<TaskDTO> listAllTaskByStatusIsNot(Status status) throws TicketingProjectException;
 
     List<TaskDTO> listAllTaskByProjectManager() throws TicketingProjectException;
 
-    void updateStatus(TaskDTO dto);
+    TaskDTO updateStatus(TaskDTO dto) throws TicketingProjectException;
 
-    List<TaskDTO> listAllTasksByStatus(Status status);
+//    List<TaskDTO> listAllTasksByStatus(Status status);
 
     List<TaskDTO> readAllByEmployee(User assignedEmployee);
 

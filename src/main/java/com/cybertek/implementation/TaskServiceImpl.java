@@ -111,9 +111,11 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public List<TaskDTO> listAllTaskByStatusIsNot(Status status) {
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByUserName(username);
+    public List<TaskDTO> listAllTaskByStatusIsNot(Status status) throws TicketingProjectException {
+        String id = SecurityContextHolder.getContext().getAuthentication().getName();
+        User user = userRepository.findById(Long.parseLong(id))
+                .orElseThrow(() -> new TicketingProjectException("USer does not exist"));
+
         List<Task> list = taskRepository.findAllByTaskStatusIsNotAndAssignedEmployee(status, user);
 
         return list.stream().map(taskMapper::convertToDto).collect(Collectors.toList());
@@ -132,28 +134,27 @@ public class TaskServiceImpl implements TaskService {
     }
 
     @Override
-    public void updateStatus(TaskDTO dto) {
+    public TaskDTO updateStatus(TaskDTO dto) throws TicketingProjectException {
 
-        Optional<Task> task = taskRepository.findById(dto.getId());
+        Task task = taskRepository.findById(dto.getId())
+                .orElseThrow(() -> new TicketingProjectException("This task does not exist"));
 
-        if (task.isPresent()){
-            task.get().setTaskStatus(dto.getTaskStatus());
-            taskRepository.save(task.get());
-        }
-
+        task.setTaskStatus(dto.getTaskStatus());
+        Task save = taskRepository.save(task);
+        return taskMapper.convertToDto(save);
     }
 
-    @Override
-    public List<TaskDTO> listAllTasksByStatus(Status status) {
-
-        String username = SecurityContextHolder.getContext().getAuthentication().getName();
-
-        User user = userRepository.findByUserName(username);
-        List<Task> list = taskRepository.findAllByTaskStatusAndAssignedEmployee(status,user);
-
-        return list.stream().map(taskMapper::convertToDto).collect(Collectors.toList());
-
-    }
+//    @Override
+//    public List<TaskDTO> listAllTasksByStatus(Status status) {
+//
+//        String username = SecurityContextHolder.getContext().getAuthentication().getName();
+//
+//        User user = userRepository.findByUserName(username);
+//        List<Task> list = taskRepository.findAllByTaskStatusAndAssignedEmployee(status,user);
+//
+//        return list.stream().map(taskMapper::convertToDto).collect(Collectors.toList());
+//
+//    }
 
     @Override
     public List<TaskDTO> readAllByEmployee(User assignedEmployee) {
