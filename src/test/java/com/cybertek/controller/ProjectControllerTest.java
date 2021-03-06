@@ -5,15 +5,21 @@ import com.cybertek.dto.RoleDTO;
 import com.cybertek.dto.UserDTO;
 import com.cybertek.enums.Gender;
 import com.cybertek.enums.Status;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.SerializationFeature;
+import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultMatchers;
 
 import java.time.LocalDate;
-
-import static org.junit.jupiter.api.Assertions.*;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -54,5 +60,51 @@ class ProjectControllerTest {
                 .build();
 
     }
+
+    @Test
+    public void givenNoToken_whenGetSecureRequest() throws Exception {
+
+        mockMvc.perform(MockMvcRequestBuilders.get("/api/v1/project/Api1"))
+                .andExpect(MockMvcResultMatchers.status().is4xxClientError());
+
+    }
+
+    @Test
+    public void givenToken_getAllProjects() throws Exception {
+        mockMvc.perform(
+                MockMvcRequestBuilders.get("/api/v1/project")
+                        .header("Authorization",token)
+                        .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].projectCode").exists())
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].assignedManager.userName").isNotEmpty());
+
+    }
+
+    @Test
+    public void givenToken_createProject() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                    .post("/api/v1/project")
+                    .header("Authorization",token)
+                    .content(toJsonString(projectDTO))
+            .contentType(MediaType.APPLICATION_JSON))
+         .andExpect(MockMvcResultMatchers.jsonPath("projectCode").isNotEmpty());
+
+
+    }
+
+    protected String toJsonString(final Object obj){
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        objectMapper.configure(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS,false);
+        objectMapper.registerModule(new JavaTimeModule());
+        try {
+            return objectMapper.writeValueAsString(obj);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+
+    }
+
 
 }
