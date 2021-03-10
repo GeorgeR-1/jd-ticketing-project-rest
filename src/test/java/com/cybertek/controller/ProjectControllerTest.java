@@ -34,7 +34,7 @@ class ProjectControllerTest {
     static ProjectDTO projectDTO;
 
     @BeforeAll
-    static void setUp(){
+    static void setUp() {
 
         userDTO = UserDTO.builder()
                 .id(2L)
@@ -43,12 +43,12 @@ class ProjectControllerTest {
                 .userName("george.radac@cybertekschool.com")
                 .passWord("abc123")
                 .confirmPassword("abc123")
-                .role(new RoleDTO(2l,"Manager"))
+                .role(new RoleDTO(2l, "Manager"))
                 .gender(Gender.MALE)
                 .build();
 
         projectDTO = ProjectDTO.builder()
-                .projectCode("Api2")
+                .projectCode("Api1")
                 .projectName("Api")
                 .assignedManager(userDTO)
                 .startDate(LocalDate.now())
@@ -73,7 +73,7 @@ class ProjectControllerTest {
     public void givenToken_getAllProjects() throws Exception {
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/v1/project")
-                        .header("Authorization",token)
+                        .header("Authorization", token)
                         .content(toJsonString(projectDTO))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
@@ -85,19 +85,47 @@ class ProjectControllerTest {
     @Test
     public void givenToken_createProject() throws Exception {
         mockMvc.perform(MockMvcRequestBuilders
-                    .post("/api/v1/project")
-                    .header("Authorization",token)
-                    .content(toJsonString(projectDTO))
-            .contentType(MediaType.APPLICATION_JSON))
-         .andExpect(MockMvcResultMatchers.jsonPath("$.data.projectCode").isNotEmpty());
+                .post("/api/v1/project")
+                .header("Authorization", token)
+                .content(toJsonString(projectDTO))
+                .contentType(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.jsonPath("$.data.projectCode").isNotEmpty());
 
 
     }
 
-    protected String toJsonString(final Object obj){
+    @Test
+    public void givenToken_updateProject() throws Exception {
+
+        projectDTO.setId(2L);
+
+        mockMvc.perform(MockMvcRequestBuilders
+                .put("/api/v1/project")
+                .header("Authorization", token)
+                .content(toJsonString(projectDTO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk())
+                .andExpect(MockMvcResultMatchers.jsonPath("message").value("Project is updated"));
+
+    }
+
+    @Test
+    public void givenToken_deleteProject() throws Exception {
+        mockMvc.perform(MockMvcRequestBuilders
+                .delete("/api/v1/project/" + projectDTO.getProjectCode())
+                .header("Authorization", token)
+                .content(toJsonString(projectDTO))
+                .contentType(MediaType.APPLICATION_JSON)
+                .accept(MediaType.APPLICATION_JSON))
+                .andExpect(MockMvcResultMatchers.status().isOk());
+    }
+
+
+    protected String toJsonString(final Object obj) {
 
         ObjectMapper objectMapper = new ObjectMapper();
-        objectMapper.configure(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS,false);
+        objectMapper.configure(SerializationFeature.WRITE_DATE_KEYS_AS_TIMESTAMPS, false);
         objectMapper.registerModule(new JavaTimeModule());
         try {
             return objectMapper.writeValueAsString(obj);
