@@ -28,7 +28,7 @@ class ProjectControllerTest {
     @Autowired
     private MockMvc mockMvc;
 
-    private final String token = "eyJhbGciOiJIUzI1NiJ9.eyJmaXJzdE5hbWUiOiJhZG1pbiIsImxhc3ROYW1lIjoiYWRtaW4iLCJzdWIiOiJhZG1pbkBhZG1pbi5jb20iLCJpZCI6MSwiZXhwIjoxNjE1MDkzODU5LCJpYXQiOjE2MTUwNTc4NTksInVzZXJuYW1lIjoiYWRtaW5AYWRtaW4uY29tIn0.M9tdnwIXswVUkh9O4D7HVXTt0ZNwR2PeiG13SgSS_gk";
+    private final String token = "eyJhbGciOiJIUzI1NiJ9.eyJmaXJzdE5hbWUiOiJhZG1pbiIsImxhc3ROYW1lIjoiYWRtaW4iLCJzdWIiOiJhZG1pbkBhZG1pbi5jb20iLCJpZCI6MSwiZXhwIjoxNjE1MzcxMDg4LCJpYXQiOjE2MTUzMzUwODgsInVzZXJuYW1lIjoiYWRtaW5AYWRtaW4uY29tIn0.nH3_ry7Eo85XBH5FenNVp9xh4RGp1eMKReGpu-IQMAQ";
 
     static UserDTO userDTO;
     static ProjectDTO projectDTO;
@@ -40,7 +40,7 @@ class ProjectControllerTest {
                 .id(2L)
                 .firstName("Mike")
                 .lastName("Smith")
-                .userName("george.radac@cybertekschoo.com")
+                .userName("george.radac@cybertekschool.com")
                 .passWord("abc123")
                 .confirmPassword("abc123")
                 .role(new RoleDTO(2l,"Manager"))
@@ -48,7 +48,7 @@ class ProjectControllerTest {
                 .build();
 
         projectDTO = ProjectDTO.builder()
-                .projectCode("Api1")
+                .projectCode("Api2")
                 .projectName("Api")
                 .assignedManager(userDTO)
                 .startDate(LocalDate.now())
@@ -74,6 +74,7 @@ class ProjectControllerTest {
         mockMvc.perform(
                 MockMvcRequestBuilders.get("/api/v1/project")
                         .header("Authorization",token)
+                        .content(toJsonString(projectDTO))
                         .accept(MediaType.APPLICATION_JSON))
                 .andExpect(MockMvcResultMatchers.status().isOk())
                 .andExpect(MockMvcResultMatchers.jsonPath("$.data[0].projectCode").exists())
@@ -88,7 +89,7 @@ class ProjectControllerTest {
                     .header("Authorization",token)
                     .content(toJsonString(projectDTO))
             .contentType(MediaType.APPLICATION_JSON))
-         .andExpect(MockMvcResultMatchers.jsonPath("projectCode").isNotEmpty());
+         .andExpect(MockMvcResultMatchers.jsonPath("$.data.projectCode").isNotEmpty());
 
 
     }
